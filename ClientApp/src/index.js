@@ -4,14 +4,14 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
-import { Counters } from "./components/Counters";
+//import { Counters } from "./components/Counters";
 
 const baseUrl = document.getElementsByTagName("base")[0].getAttribute("href");
 const rootElement = document.getElementById("root");
 
 ReactDOM.render(
   <BrowserRouter basename={baseUrl}>
-    <Counters />
+    <App />
   </BrowserRouter>,
   rootElement
 );

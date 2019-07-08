@@ -30,6 +30,7 @@ namespace AspNetCoreReactSpa
 
       services.AddTransient<IPieRepository, PieRepository>();
       services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+      services.AddTransient<ICityRepository, CityRepository>();
       services.AddTransient<ISeedData, SeedData>();
 
       services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
