@@ -18,11 +18,11 @@ export class FetchEmployee extends Component {
   }
 
   handleEdit = id => {
-    this.props.history.push("/edit/" + id);
+    this.props.history.push("/AddUpdate/" + id);
   };
 
   handleCreate = id => {
-    this.props.history.push("/create");
+    this.props.history.push("/AddUpdate");
   };
 
   // Handle Delete request for an employee
@@ -44,6 +44,7 @@ export class FetchEmployee extends Component {
       <table className="table table-striped">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>City</th>
             <th>Department</th>
@@ -61,6 +62,7 @@ export class FetchEmployee extends Component {
         <tbody>
           {this.state.employees.map(employee => (
             <tr key={employee.id}>
+              <td>{employee.id}</td>
               <td>{employee.name}</td>
               <td>{employee.city}</td>
               <td>{employee.department}</td>

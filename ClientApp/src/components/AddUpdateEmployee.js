@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 
-class CreateEmployee extends Component {
+class AddUpdateEmployee extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      title: "Add Employee",
       loading: true,
       cityList: [],
       name: "",
@@ -17,6 +18,7 @@ class CreateEmployee extends Component {
     this.onChangeCity = this.onChangeCity.bind(this);
     this.onChangeDepartment = this.onChangeDepartment.bind(this);
     this.onChangeGender = this.onChangeGender.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
 
     this.onSubmit = this.onSubmit.bind(this);
   }
@@ -27,6 +29,31 @@ class CreateEmployee extends Component {
       .then(data => {
         this.setState({ cityList: data, loading: false });
       });
+  }
+
+  componentDidMount() {
+    this.setEmployeeDetails();
+  }
+
+  setEmployeeDetails() {
+    var id = this.props.match.params["id"];
+    // This will set state for Edit employee
+    if (id === "") {
+      this.state = { title: "Create Employee", loading: false };
+    } else if (id > 0) {
+      fetch("api/Employee/" + id)
+        .then(response => response.json())
+        .then(res => {
+          this.setState({
+            title: "Edit Employee",
+            loading: false,
+            name: res.name,
+            department: res.department,
+            city: res.city,
+            gender: res.gender
+          });
+        });
+    }
   }
 
   onChangeName(e) {
@@ -51,6 +78,11 @@ class CreateEmployee extends Component {
     });
   }
 
+  handleCancel(e) {
+    e.preventDefault();
+    this.props.history.push("/fetch-employee");
+  }
+
   onSubmit(e) {
     e.preventDefault();
     const empObj = {
@@ -60,20 +92,36 @@ class CreateEmployee extends Component {
       City: this.state.city
     };
     // Post request for Create employee.
-    fetch("api/Employee", {
+    fetch("api/Employee/", {
       method: "POST",
-      body: empObj
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(empObj)
     })
       .then(response => response.json())
       .then(responseJson => {
-        this.props.history.push("/fetchemployee");
+        this.props.history.push("/fetch-employee");
       });
   }
 
   render() {
+    let contents = this.state.loading ? (
+      <p>
+        <em>Loading...</em>
+      </p>
+    ) : (
+      this.renderCreateNewEmployeeForm()
+    );
+
+    return <div>{contents}</div>;
+  }
+
+  renderCreateNewEmployeeForm() {
     return (
       <div style={{ marginTop: 10 }}>
-        <h3>Add New Employee</h3>
+        <h3>{this.state.title}</h3>
         <div className="row">
           <form onSubmit={this.onSubmit} className="col-md-6">
             <div className="form-group">
@@ -133,6 +181,9 @@ class CreateEmployee extends Component {
               <button type="submit" className="btn btn-success">
                 Save
               </button>
+              <button onClick={this.handleCancel} className="btn btn-default">
+                Cancel
+              </button>
             </div>
           </form>
         </div>
@@ -141,4 +192,4 @@ class CreateEmployee extends Component {
   }
 }
 
-export default CreateEmployee;
+export default AddUpdateEmployee;
