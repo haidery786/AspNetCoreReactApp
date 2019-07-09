@@ -45,7 +45,7 @@ namespace AspNetCoreReactSpa.Models
     public bool UpdateEmployee(Employee newEmployee)
     {
       Employee existEmployee = _appDbContext.Employees.Find(newEmployee.Id);
-      if (newEmployee == null)
+      if (newEmployee == null || existEmployee == null)
         return false;
 
       existEmployee.Name = newEmployee.Name;
