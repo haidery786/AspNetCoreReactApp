@@ -7,6 +7,7 @@ class AddUpdateEmployee extends Component {
       title: "Add Employee",
       loading: true,
       cityList: [],
+      employeeId: 0,
       name: "",
       city: "",
       department: "",
@@ -36,10 +37,10 @@ class AddUpdateEmployee extends Component {
   }
 
   setEmployeeDetails() {
-    var id = this.props.match.params["id"];
+    let id = this.props.match.params["id"];
     // This will set state for Edit employee
     if (id === "") {
-      this.state = { title: "Create Employee", loading: false };
+      this.state = { title: "Create Employee", loading: false, employeeId: 0 };
     } else if (id > 0) {
       fetch("api/Employee/" + id)
         .then(response => response.json())
@@ -50,7 +51,8 @@ class AddUpdateEmployee extends Component {
             name: res.name,
             department: res.department,
             city: res.city,
-            gender: res.gender
+            gender: res.gender,
+            employeeId: res.id
           });
         });
     }
@@ -89,21 +91,39 @@ class AddUpdateEmployee extends Component {
       Name: this.state.name,
       Department: this.state.department,
       Gender: this.state.gender,
-      City: this.state.city
+      City: this.state.city,
+      Id: this.state.employeeId
     };
-    // Post request for Create employee.
-    fetch("api/Employee/", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(empObj)
-    })
-      .then(response => response.json())
-      .then(responseJson => {
-        this.props.history.push("/fetch-employee");
-      });
+
+    if (this.state.employeeId > 0) {
+      // PUT request to update employee.
+      fetch("api/Employee/" + this.state.employeeId, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(empObj)
+      })
+        .then(response => response.json())
+        .then(responseJson => {
+          this.props.history.push("/fetch-employee");
+        });
+    } else {
+      // Post request for Create employee.
+      fetch("api/Employee/", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(empObj)
+      })
+        .then(response => response.json())
+        .then(responseJson => {
+          this.props.history.push("/fetch-employee");
+        });
+    }
   }
 
   render() {
