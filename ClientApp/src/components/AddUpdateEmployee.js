@@ -40,7 +40,11 @@ class AddUpdateEmployee extends Component {
     let id = this.props.match.params["id"];
     // This will set state for Edit employee
     if (id === "") {
-      this.state = { title: "Create Employee", loading: false, employeeId: 0 };
+      this.setState({
+        title: "Create Employee",
+        loading: false,
+        employeeId: 0
+      });
     } else if (id > 0) {
       fetch("api/Employee/" + id)
         .then(response => response.json())

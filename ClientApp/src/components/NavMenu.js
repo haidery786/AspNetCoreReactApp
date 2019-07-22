@@ -14,9 +14,19 @@ import "./NavMenu.css";
 export class NavMenu extends Component {
   static displayName = NavMenu.name;
 
+  componentDidMount() {
+    // calling this method will also update userProfile object in Auth Class
+    if (this.props.auth.isAuthenticated()) this.loadUserProfile();
+  }
+
+  loadUserProfile() {
+    this.props.auth.getProfile((profile, error) =>
+      this.setState({ profile, error })
+    );
+  }
+
   constructor(props) {
     super(props);
-
     this.toggleNavbar = this.toggleNavbar.bind(this);
     this.state = {
       collapsed: true
@@ -30,6 +40,8 @@ export class NavMenu extends Component {
   }
 
   render() {
+    const { isAuthenticated, login, logout, userProfile } = this.props.auth;
+    if (userProfile) console.log(userProfile.name);
     return (
       <header>
         <Navbar
@@ -38,7 +50,7 @@ export class NavMenu extends Component {
         >
           <Container>
             <NavbarBrand tag={Link} to="/">
-              AspNetCoreReactSpa
+              AspNetCoreReactSPA
             </NavbarBrand>
             <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
             <Collapse
@@ -46,32 +58,54 @@ export class NavMenu extends Component {
               isOpen={!this.state.collapsed}
               navbar
             >
-              <ul className="navbar-nav flex-grow">
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/">
-                    Home
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink
-                    tag={Link}
-                    className="text-dark"
-                    to="/fetch-employee"
-                  >
-                    Fetch Employees
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/counter">
-                    Counter
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/fetch-data">
-                    Fetch data
-                  </NavLink>
-                </NavItem>
-              </ul>
+              {isAuthenticated() ? (
+                <ul className="navbar-nav flex-grow">
+                  <NavItem>
+                    <NavLink
+                      tag={Link}
+                      className="text-dark"
+                      to="/fetch-employee"
+                    >
+                      Fetch Employees
+                    </NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/profile">
+                      {userProfile ? userProfile.name : "Profil Name"}
+                    </NavLink>
+                  </NavItem>
+
+                  <NavItem>
+                    <NavLink
+                      tag={Link}
+                      onClick={logout}
+                      className="text-dark"
+                      to="/"
+                    >
+                      Logout
+                    </NavLink>
+                  </NavItem>
+                </ul>
+              ) : (
+                <ul className="navbar-nav flex-grow">
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/">
+                      Home
+                    </NavLink>
+                  </NavItem>
+
+                  <NavItem>
+                    <NavLink
+                      tag={Link}
+                      onClick={login}
+                      className="text-dark"
+                      to="/"
+                    >
+                      Login
+                    </NavLink>
+                  </NavItem>
+                </ul>
+              )}
             </Collapse>
           </Container>
         </Navbar>
