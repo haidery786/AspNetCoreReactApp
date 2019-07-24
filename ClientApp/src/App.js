@@ -10,6 +10,8 @@ import AddUpdateEmployee from "./components/AddUpdateEmployee";
 import Profile from "./components/Profile";
 import Auth from "./Auth/Auth";
 import Callback from "./Auth/Callback";
+import Public from "./Public";
+import Private from "./Private";
 
 export default class App extends Component {
   constructor(props) {
@@ -43,6 +45,12 @@ export default class App extends Component {
           }
         />
         <Route path="/counter" component={Counter} />
+        <Route path="/public" component={Public} />
+        <Route
+          exact
+          path="/private"
+          render={props => <Private auth={this.auth} {...props} />}
+        />
         <Route path="/fetch-data" component={FetchData} />
         <Route
           path="/fetch-employee"

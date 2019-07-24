@@ -34,8 +34,11 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "proxy": "http://localhost:5002",
   "scripts": {
-    "start": "rimraf ./build && react-scripts start",
+    "start": "run-p start:client start:server",
+    "start:client": "rimraf ./build && react-scripts start",
+    "start:server": "node server.js",
     "build": "react-scripts build",
     "test": "cross-env CI=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
