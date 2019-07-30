@@ -1,20 +1,33 @@
 import auth0 from "auth0-js";
 
+const REDIRECT_ON_LOGIN = "redirect_on_login";
+//eslint-disable-next-line
+let _idToken = null;
+let _accessToken = null;
+let _scopes = null;
+let _expiresAt = null;
+
 export default class Auth {
   constructor(history) {
     this.history = history;
     this.userProfile = null;
+    this.userName = null;
+    this.requestedScopes = "openid profile email read:courses";
     this.auth0 = new auth0.WebAuth({
       domain: process.env.REACT_APP_AUTH0_DOMAIN,
       clientID: process.env.REACT_APP_AUTH0_CLIENT_ID,
       redirectUri: process.env.REACT_APP_AUTH0_CALLBACK_URL,
       audience: process.env.REACT_APP_AUTH0_AUDIENCE,
       responseType: "token id_token",
-      scope: "openid profile email"
+      scope: this.requestedScopes
     });
   }
 
   login = () => {
+    localStorage.setItem(
+      REDIRECT_ON_LOGIN,
+      JSON.stringify(this.history.location)
+    );
     this.auth0.authorize();
   };
 
@@ -22,34 +35,46 @@ export default class Auth {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
-        this.history.push("/");
+        this.setUserName();
+        this.gottoRedirectLocation();
       } else if (err) {
         this.history.push("/");
         alert(`Error: ${err.error}. Check the console for further details`);
         console.log(err);
       }
+      localStorage.removeItem(REDIRECT_ON_LOGIN);
     });
   };
 
+  gottoRedirectLocation() {
+    const redirectLocation =
+      localStorage.getItem(REDIRECT_ON_LOGIN) === "undefined"
+        ? "/"
+        : JSON.parse(localStorage.getItem(REDIRECT_ON_LOGIN));
+    this.history.push(redirectLocation);
+  }
+
+  setUserName() {
+    this.auth0.client.userInfo(this.getAccessToken(), (err, profile) => {
+      if (profile) {
+        let userName = profile.family_name || profile.name;
+        this.userName = "Hi " + userName;
+      }
+    });
+  }
+
   setSession = authResult => {
-    const expiredAt = JSON.stringify(
-      authResult.expiresIn * 1000 + new Date().getTime()
-    );
-    localStorage.setItem("access_token", authResult.accessToken);
-    localStorage.setItem("id_token", authResult.idToken);
-    localStorage.setItem("expiredAt", expiredAt);
+    _expiresAt = authResult.expiresIn * 1000 + new Date().getTime();
+    _scopes = authResult.scope || this.requestedScopes || "";
+    _accessToken = authResult.accessToken;
+    _idToken = authResult.idToken;
   };
 
   isAuthenticated = () => {
-    const expiresAt = JSON.parse(localStorage.getItem("expiredAt"));
-    return new Date().getTime() < expiresAt;
+    return new Date().getTime() < _expiresAt;
   };
 
   logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("id_token");
-    localStorage.removeItem("expiredAt");
-    this.userProfile = null;
     this.auth0.logout({
       clientID: process.env.REACT_APP_AUTH0_CLIENT_ID,
       returnTo: "https://localhost:5050/"
@@ -57,16 +82,22 @@ export default class Auth {
   };
 
   getAccessToken = () => {
-    const access_token = localStorage.getItem("access_token");
-    if (!access_token) throw new Error("No access token found.");
-    return access_token;
+    if (!_accessToken) throw new Error("No access token found.");
+    return _accessToken;
   };
 
   getProfile = cb => {
     if (this.userProfile) return cb(this.userProfile);
     this.auth0.client.userInfo(this.getAccessToken(), (err, profile) => {
-      if (profile) this.userProfile = profile;
+      if (profile) {
+        this.userProfile = profile;
+      }
       cb(profile, err);
     });
   };
+
+  userHasScopes(scopes) {
+    const grantedScopes = (_scopes || "").split(" ");
+    return scopes.every(scope => grantedScopes.includes(scope));
+  }
 }

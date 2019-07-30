@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Route } from "react-router";
 import { Layout } from "./components/Layout";
-import { Redirect } from "react-router-dom";
 import { Home } from "./components/Home";
 import { FetchData } from "./components/FetchData";
 import { Counter } from "./components/Counter";
@@ -10,61 +9,47 @@ import AddUpdateEmployee from "./components/AddUpdateEmployee";
 import Profile from "./components/Profile";
 import Auth from "./Auth/Auth";
 import Callback from "./Auth/Callback";
-import Public from "./Public";
-import Private from "./Private";
+import Public from "./components/Public";
+import Courses from "./components/Courses";
+import PrivateRoute from "./components/PrivateRoute";
+import AuthContext from "./components/AuthContext";
+import Secure from "./components/Secure";
 
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.auth = new Auth(this.props.history);
+    this.state = {
+      auth: new Auth(this.props.history)
+    };
   }
   static displayName = App.name;
 
   render() {
+    const { auth } = this.state;
     return (
-      <Layout auth={this.auth} props={this.props}>
-        <Route
-          exact
-          path="/"
-          render={props => <Home auth={this.auth} {...props} />}
-        />
-        <Route
-          exact
-          path="/callback"
-          render={props => <Callback auth={this.auth} {...props} />}
-        />
-        <Route
-          exact
-          path="/profile"
-          render={props =>
-            this.auth.isAuthenticated() ? (
-              <Profile auth={this.auth} {...props} />
-            ) : (
-              <Redirect to="/" />
-            )
-          }
-        />
-        <Route path="/counter" component={Counter} />
-        <Route path="/public" component={Public} />
-        <Route
-          exact
-          path="/private"
-          render={props => <Private auth={this.auth} {...props} />}
-        />
-        <Route path="/fetch-data" component={FetchData} />
-        <Route
-          path="/fetch-employee"
-          render={props =>
-            this.auth.isAuthenticated() ? (
-              <FetchEmployee {...props} />
-            ) : (
-              <Redirect to="/" />
-            )
-          }
-        />
-        <Route exact path="/AddUpdate" component={AddUpdateEmployee} />
-        <Route path="/AddUpdate/:id" component={AddUpdateEmployee} />
-      </Layout>
+      <AuthContext.Provider value={auth}>
+        <Layout auth={auth} props={this.props}>
+          <Route
+            exact
+            path="/"
+            render={props => <Home auth={auth} {...props} />}
+          />
+          <Route
+            exact
+            path="/callback"
+            render={props => <Callback auth={auth} {...props} />}
+          />
+          <PrivateRoute path="/profile" component={Profile} />
+          <Route path="/counter" component={Counter} />
+          <Route path="/public" component={Public} />
+          <PrivateRoute path="/secure" component={Secure} />
+          <PrivateRoute path="/courses" component={Courses} />
+          <Route path="/fetch-data" component={FetchData} />
+          <PrivateRoute path="/fetch-employee" component={FetchEmployee} />
+          <Route exact path="/AddUpdate" component={AddUpdateEmployee} />
+          <Route path="/AddUpdate/:id" component={AddUpdateEmployee} />
+        </Layout>
+      </AuthContext.Provider>
     );
   }
 }

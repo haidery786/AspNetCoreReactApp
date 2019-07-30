@@ -5,6 +5,8 @@ require("dotenv").config();
 
 var jwt = require("express-jwt"); // Validate JWT and set req.user
 var jwks = require("jwks-rsa"); // Retrieve RSA from a JSON Web Key set (JWKS) endpoint
+const checkScope = require("express-jwt-authz"); // Validate JWT scopes
+
 const jwtCheck = jwt({
   // Dynamically provide a signing key based on the kind in the header
   // and the signing keys provided by the JWKS endpoint.
@@ -18,7 +20,7 @@ const jwtCheck = jwt({
   }),
   // Validate the audience and the issure
   audience: process.env.REACT_APP_AUTH0_AUDIENCE,
-  issuer: `https://${process.env.REACT_APP_AUTH0_DOMAIN}`,
+  issuer: `https://${process.env.REACT_APP_AUTH0_DOMAIN}/`,
   //This must match the algorithm selected in the Auth0 dashboard under app's dashboard setting under the OAuth tab
   algorithms: ["RS256"]
 });
@@ -32,10 +34,19 @@ app.get("/public", function(req, res) {
   });
 });
 
-//private end point
-app.get("/private", jwtCheck, function(req, res) {
+app.get("/courses", jwtCheck, checkScope(["read:courses"]), function(req, res) {
   res.json({
-    message: "Hello from a private API"
+    courses: [
+      { id: 1, title: "Building Apps with React and Redux" },
+      { id: 2, title: "Creating Reusable React Components" }
+    ]
+  });
+});
+
+//private end point
+app.get("/secure", jwtCheck, function(req, res) {
+  res.json({
+    message: "Hello from a secure API"
   });
 });
 

@@ -14,22 +14,12 @@ import "./NavMenu.css";
 export class NavMenu extends Component {
   static displayName = NavMenu.name;
 
-  componentDidMount() {
-    // calling this method will also update userProfile object in Auth Class
-    if (this.props.auth.isAuthenticated()) this.loadUserProfile();
-  }
-
-  loadUserProfile() {
-    this.props.auth.getProfile((profile, error) =>
-      this.setState({ profile, error })
-    );
-  }
-
   constructor(props) {
     super(props);
     this.toggleNavbar = this.toggleNavbar.bind(this);
     this.state = {
-      collapsed: true
+      collapsed: true,
+      userProfile: localStorage.getItem("userProfile")
     };
   }
 
@@ -40,8 +30,14 @@ export class NavMenu extends Component {
   }
 
   render() {
-    const { isAuthenticated, login, logout, userProfile } = this.props.auth;
-    if (userProfile) console.log(userProfile.name);
+    const {
+      isAuthenticated,
+      login,
+      logout,
+      userHasScopes,
+      userName
+    } = this.props.auth;
+    console.log("Local Storage User Profile:" + userName);
     return (
       <header>
         <Navbar
@@ -58,8 +54,35 @@ export class NavMenu extends Component {
               isOpen={!this.state.collapsed}
               navbar
             >
-              {isAuthenticated() ? (
-                <ul className="navbar-nav flex-grow">
+              <ul className="navbar-nav flex-grow">
+                <NavItem>
+                  <NavLink tag={Link} className="text-dark" to="/">
+                    Home
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink tag={Link} className="text-dark" to="/public">
+                    Public
+                  </NavLink>
+                </NavItem>
+
+                {isAuthenticated() && (
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/secure">
+                      Secure
+                    </NavLink>
+                  </NavItem>
+                )}
+
+                {isAuthenticated() && userHasScopes(["read:courses"]) && (
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to="/courses">
+                      Courses
+                    </NavLink>
+                  </NavItem>
+                )}
+
+                {isAuthenticated() && (
                   <NavItem>
                     <NavLink
                       tag={Link}
@@ -69,43 +92,25 @@ export class NavMenu extends Component {
                       Fetch Employees
                     </NavLink>
                   </NavItem>
+                )}
+                {isAuthenticated() && (
                   <NavItem>
                     <NavLink tag={Link} className="text-dark" to="/profile">
-                      {userProfile ? userProfile.name : "Profil Name"}
+                      {userName ? userName : "Profile"}
                     </NavLink>
                   </NavItem>
-
-                  <NavItem>
-                    <NavLink
-                      tag={Link}
-                      onClick={logout}
-                      className="text-dark"
-                      to="/"
-                    >
-                      Logout
-                    </NavLink>
-                  </NavItem>
-                </ul>
-              ) : (
-                <ul className="navbar-nav flex-grow">
-                  <NavItem>
-                    <NavLink tag={Link} className="text-dark" to="/">
-                      Home
-                    </NavLink>
-                  </NavItem>
-
-                  <NavItem>
-                    <NavLink
-                      tag={Link}
-                      onClick={login}
-                      className="text-dark"
-                      to="/"
-                    >
-                      Login
-                    </NavLink>
-                  </NavItem>
-                </ul>
-              )}
+                )}
+                <NavItem>
+                  <NavLink
+                    tag={Link}
+                    onClick={isAuthenticated() ? logout : login}
+                    className="text-dark"
+                    to="/"
+                  >
+                    {isAuthenticated() ? "Logout" : "Login"}
+                  </NavLink>
+                </NavItem>
+              </ul>
             </Collapse>
           </Container>
         </Navbar>
