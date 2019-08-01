@@ -5,7 +5,7 @@ import { Home } from "./components/Home";
 import { FetchData } from "./components/FetchData";
 import { Counter } from "./components/Counter";
 import { FetchEmployee } from "./components/FetchEmployee";
-import AddUpdateEmployee from "./components/AddUpdateEmployee";
+import AddEmployee from "./components/AddEmployee";
 import Profile from "./components/Profile";
 import Auth from "./Auth/Auth";
 import Callback from "./Auth/Callback";
@@ -14,6 +14,7 @@ import Courses from "./components/Courses";
 import PrivateRoute from "./components/PrivateRoute";
 import AuthContext from "./components/AuthContext";
 import Secure from "./components/Secure";
+import EditEmployee from "./components/EditEmployee";
 
 export default class App extends Component {
   constructor(props) {
@@ -46,8 +47,8 @@ export default class App extends Component {
           <PrivateRoute path="/courses" component={Courses} />
           <Route path="/fetch-data" component={FetchData} />
           <PrivateRoute path="/fetch-employee" component={FetchEmployee} />
-          <Route exact path="/AddUpdate" component={AddUpdateEmployee} />
-          <Route path="/AddUpdate/:id" component={AddUpdateEmployee} />
+          <PrivateRoute path="/Add" component={AddEmployee} />
+          <PrivateRoute path="/Edit/:id" component={EditEmployee} />
         </Layout>
       </AuthContext.Provider>
     );

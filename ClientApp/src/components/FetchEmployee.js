@@ -6,31 +6,42 @@ export class FetchEmployee extends Component {
   constructor(props) {
     super(props);
     this.state = { employees: [], loading: true };
-    this.getEmployeeData();
   }
 
-  getEmployeeData() {
-    fetch("api/Employee")
+  componentDidMount() {
+    const accessToken = this.props.auth.getAccessToken();
+
+    fetch("/api/Employee", {
+      headers: new Headers({
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`
+      })
+    })
       .then(response => response.json())
-      .then(data => {
-        this.setState({ employees: data, loading: false });
-      });
+      .then(data => this.setState({ employees: data, loading: false }))
+      .catch(error => console.log(error));
   }
 
   handleEdit = id => {
-    this.props.history.push("/AddUpdate/" + id);
+    this.props.history.push("/Edit/" + id);
   };
 
   handleCreate = id => {
-    this.props.history.push("/AddUpdate");
+    this.props.history.push("/Add");
   };
 
   // Handle Delete request for an employee
   handleDelete = id => {
     if (window.confirm("Do you want to delete employee with Id: " + id)) {
+      const accessToken = this.props.auth.getAccessToken();
       //if (!confirm("Do you want to delete employee with Id: " + id)) return;
       fetch("api/Employee/" + id, {
-        method: "delete"
+        method: "delete",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        }
       }).then(data => {
         this.setState({
           employees: this.state.employees.filter(rec => rec.id !== id)

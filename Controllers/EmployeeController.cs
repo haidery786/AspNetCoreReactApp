@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AspNetCoreReactSpa.Controllers
 {
-  [Route("api/[controller]")]
-  public class EmployeeController : Controller
+  public class EmployeeController : BaseController
   {
     private readonly IEmployeeRepository _employeeRepository;
 

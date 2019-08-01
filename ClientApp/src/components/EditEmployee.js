@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 
-class AddUpdateEmployee extends Component {
+class EditEmployee extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: "Add Employee",
+      title: "",
       loading: true,
       cityList: [],
       employeeId: 0,
@@ -13,7 +13,6 @@ class AddUpdateEmployee extends Component {
       department: "",
       gender: ""
     };
-    this.getCityData();
 
     this.onChangeName = this.onChangeName.bind(this);
     this.onChangeCity = this.onChangeCity.bind(this);
@@ -24,29 +23,34 @@ class AddUpdateEmployee extends Component {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
+  componentDidMount() {
+    this.getCityData();
+    this.getEmployeeDetails();
+  }
+
+  componentWillMount() {
+    console.log("Called");
+  }
+
   getCityData() {
     fetch("api/City")
       .then(response => response.json())
       .then(data => {
-        this.setState({ cityList: data, loading: false });
+        this.setState({ cityList: data });
       });
   }
 
-  componentDidMount() {
-    this.setEmployeeDetails();
-  }
-
-  setEmployeeDetails() {
-    let id = this.props.match.params["id"];
+  getEmployeeDetails() {
+    const accessToken = this.props.auth.getAccessToken();
+    var id = this.props.match.params["id"];
     // This will set state for Edit employee
-    if (id === "") {
-      this.setState({
-        title: "Create Employee",
-        loading: false,
-        employeeId: 0
-      });
-    } else if (id > 0) {
-      fetch("api/Employee/" + id)
+    if (id > 0) {
+      fetch("api/Employee/" + id, {
+        headers: new Headers({
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`
+        })
+      })
         .then(response => response.json())
         .then(res => {
           this.setState({
@@ -98,28 +102,15 @@ class AddUpdateEmployee extends Component {
       City: this.state.city,
       Id: this.state.employeeId
     };
-
+    const accessToken = this.props.auth.getAccessToken();
     if (this.state.employeeId > 0) {
       // PUT request to update employee.
       fetch("api/Employee/" + this.state.employeeId, {
         method: "PUT",
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(empObj)
-      })
-        .then(response => response.json())
-        .then(responseJson => {
-          this.props.history.push("/fetch-employee");
-        });
-    } else {
-      // Post request for Create employee.
-      fetch("api/Employee/", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
         },
         body: JSON.stringify(empObj)
       })
@@ -216,4 +207,4 @@ class AddUpdateEmployee extends Component {
   }
 }
 
-export default AddUpdateEmployee;
+export default EditEmployee;

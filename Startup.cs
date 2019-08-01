@@ -1,5 +1,6 @@
 using AspNetCoreReactSpa.Data;
 using AspNetCoreReactSpa.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -35,6 +36,17 @@ namespace AspNetCoreReactSpa
 
       services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+      // 1. Add Authentication Services
+      services.AddAuthentication(options =>
+      {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      }).AddJwtBearer(options =>
+      {
+        options.Authority = Configuration["Auth0:Authority"];
+        options.Audience = Configuration["Auth0:Audience"];
+      });
+
       // In production, the React files will be served from this directory
       services.AddSpaStaticFiles(configuration =>
       {
@@ -58,6 +70,10 @@ namespace AspNetCoreReactSpa
 
       app.UseHttpsRedirection();
       app.UseStaticFiles();
+
+      // 2. Enable authentication middleware
+      app.UseAuthentication();
+
       app.UseSpaStaticFiles();
 
       app.UseMvc(routes =>
