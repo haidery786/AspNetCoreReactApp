@@ -2,10 +2,10 @@ import auth0 from "auth0-js";
 
 const REDIRECT_ON_LOGIN = "redirect_on_login";
 //eslint-disable-next-line
-let _idToken = null;
-let _accessToken = null;
-let _scopes = null;
-let _expiresAt = null;
+// let _idToken = null;
+// let _accessToken = null;
+// let _scopes = null;
+// let _expiresAt = null;
 
 export default class Auth {
   constructor(history) {
@@ -47,7 +47,7 @@ export default class Auth {
   };
 
   setSession = authResult => {
-    console.log(authResult);
+    //console.log(authResult);
     // set the time that the access token will expire
     // _expiresAt = authResult.expiresIn * 1000 + new Date().getTime();
     const expiresAt = JSON.stringify(

@@ -60,13 +60,13 @@ export class NavMenu extends Component {
                     Home
                   </NavLink>
                 </NavItem>
-                <NavItem>
+                {/* <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/public">
                     Public
                   </NavLink>
-                </NavItem>
+                </NavItem> */}
 
-                {isAuthenticated() && (
+                {/* {isAuthenticated() && (
                   <NavItem>
                     <NavLink tag={Link} className="text-dark" to="/secure">
                       Secure
@@ -80,7 +80,7 @@ export class NavMenu extends Component {
                       Courses
                     </NavLink>
                   </NavItem>
-                )}
+                )} */}
 
                 {isAuthenticated() && (
                   <NavItem>
